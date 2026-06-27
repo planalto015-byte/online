@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Jogo da selva</title>
+
+<style>
+body{
+    margin:0;
+    background:#123a08;
+    color:white;
+    text-align:center;
+    font-family:Arial;
+}
+
+canvas{
+    margin-top:20px;
+    border:3px solid white;
+    background:#3f1a02;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Jogo da Selva 🌴 </h1>
+<p>Use as setas para pegar a carne e fugir do leão</p>
+
+<canvas id="jogo" width="600" height="400"></canvas>
+
+<h2 id="pontos">Fome: 0</h2>
+
+<script>
+const canvas = document.getElementById("jogo");
+const ctx = canvas.getContext("2d");
+const pontosTexto = document.getElementById("pontos");
+
+let pontos = 0;
+let gameOver = false;
+
+const jogador = {
+    x: 50,
+    y: 50,
+    tamanho: 50,
+    velocidade: 10,
+    emoji: "🧍"
+};
+
+const coracao = {
+    x: 250,
+    y: 150,
+    tamanho: 40,
+    emoji: " 🥩"
+};
+
+const inimigo = {
+    x: 400,
+    y: 200,
+    tamanho: 50,
+    velocidadeX: 4,
+    velocidadeY: 2,
+    emoji: " 🦁 " 
+    
+};
+
+const inimigo2 = {
+    x: 400,
+    y: 200,
+    tamanho: 50,
+    velocidadeX: 3,
+    velocidadeY: 2,
+    emoji: " 🦁 " 
+    
+};
+
+
+const teclas = {};
+
+document.addEventListener("keydown", function(e){
+    teclas[e.key] = true;
+});
+
+document.addEventListener("keyup", function(e){
+    teclas[e.key] = false;
+});
+
+function moverJogador(){
+    if(teclas["ArrowUp"] && jogador.y > 0){
+        jogador.y -= jogador.velocidade;
+    }
+
+    if(teclas["ArrowDown"] && jogador.y < canvas.height - jogador.tamanho){
+        jogador.y += jogador.velocidade;
+    }
+
+    if(teclas["ArrowLeft"] && jogador.x > 0){
+        jogador.x -= jogador.velocidade;
+    }
+
+    if(teclas["ArrowRight"] && jogador.x < canvas.width - jogador.tamanho){
+        jogador.x += jogador.velocidade;
+    }
+}
+
+function moverInimigo(){
+    inimigo.x += inimigo.velocidadeX;
+    inimigo.y += inimigo.velocidadeY;
+
+    if(inimigo.x <= 0 || inimigo.x + inimigo.tamanho >= canvas.width){
+        inimigo.velocidadeX *= -1;
+    }
+
+    if(inimigo.y <= 0 || inimigo.y + inimigo.tamanho >= canvas.height){
+        inimigo.velocidadeY *= -1;
+    }
+}function moverInimigo2(){
+    inimigo2.x += inimigo2.velocidadeX;
+    inimigo2.y += inimigo2.velocidadeY;
+
+    if(inimigo2.x <= 0 || inimigo2.x + inimigo2.tamanho >= canvas.width){
+        inimigo2.velocidadeX *= -1;
+    }
+
+    if(inimigo2.y <= 0 || inimigo2.y + inimigo2.tamanho >= canvas.height){
+        inimigo2.velocidadeY *= -1;
+    }
+}
+
+function colisao(a, b){
+    return (
+        a.x < b.x + b.tamanho &&
+        a.x + a.tamanho > b.x &&
+        a.y < b.y + b.tamanho &&
+        a.y + a.tamanho > b.y
+    );
+}
+
+function novoCoracao(){
+    coracao.x = Math.random() * (canvas.width - coracao.tamanho);
+    coracao.y = Math.random() * (canvas.height - coracao.tamanho);
+}
+
+function desenharEmoji(objeto){
+    ctx.font = objeto.tamanho + "px Arial";
+    ctx.fillText(objeto.emoji, objeto.x, objeto.y + objeto.tamanho);
+}
+
+function desenhar(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    desenharEmoji(jogador);
+    desenharEmoji(coracao);
+    desenharEmoji(inimigo);
+    desenharEmoji(inimigo2);
+}
+
+function atualizar(){
+    if(gameOver){
+        ctx.fillStyle = "white";
+        ctx.font = "38px Arial";
+        ctx.fillText("GAME OVER 💀", 170, 190);
+        return;
+    }
+
+    moverJogador();
+    moverInimigo();
+    moverInimigo2();
+
+
+    if(colisao(jogador, coracao)){
+        pontos++;
+        pontosTexto.innerText = "Amor: " + pontos;
+        novoCoracao();
+    }
+
+    if(colisao(jogador, inimigo)){
+        gameOver = true;
+    }
+
+    desenhar();
+    requestAnimationFrame(atualizar);
+}
+
+atualizar();
+</script>
+
+</body>
+</html>
